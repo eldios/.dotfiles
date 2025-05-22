@@ -46,6 +46,9 @@
       url = "github:tomasharkema/peerix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    stylix = {
+      url = "github:danth/stylix/release-24.11";
+    };
   };
 
   outputs =
@@ -59,18 +62,20 @@
     , peerix
     , portmaster
     , sops-nix
+    , stylix
     , xremap
     , ...
     } @ inputs:
     let
-
       forAllSystems = nixpkgs.lib.genAttrs [
         "aarch64-darwin"
         "aarch64-linux"
         "x86_64-linux"
       ];
 
-      # Define common specialArgs for nixosConfigurations and homeConfigurations
+      # commonSpecialArgs: A set of common arguments passed to all system configurations.
+      # This helps avoid repetition and ensures consistency across different hosts.
+      # It includes inputs from other flakes (like home-manager, sops-nix) and nixpkgs instances.
       commonSpecialArgs = {
         inherit
           disko
@@ -83,10 +88,14 @@
           peerix
           portmaster
           sops-nix
+          stylix
           xremap
           ;
       };
 
+      # nixosConfigurations: Defines the NixOS system configurations for various hosts.
+      # Each entry (e.g., lele8845ace) represents a distinct machine and imports
+      # its specific hardware and software configuration modules.
       # Lele's AMD 8845 AceMagic NUC
       nixosConfigurations.lele8845ace = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -94,8 +103,8 @@
         modules = [
           ./hosts/lele8845ace/nixos/configuration.nix
           disko.nixosModules.disko
-          sops-nix.nixosModules.sops
           peerix.nixosModules.peerix
+          sops-nix.nixosModules.sops
         ];
       };
 
@@ -169,15 +178,23 @@
         ];
       };
 
+      # darwinConfigurations: Defines macOS system configurations using nix-darwin.
+      # Similar structure to nixosConfigurations, but for Apple systems.
+      # Currently empty, but structured for future macOS hosts.
       darwinConfigurations = { };
+
+      # homeConfigurations: Defines user-specific environments using Home Manager.
+      # These can be applied on top of NixOS or darwin configurations, or even standalone.
+      # Allows managing dotfiles, user packages, and services.
+      # Currently empty, but structured for future user profiles not tied to a specific host system configuration.
       homeConfigurations = { };
 
     in
     {
       # Return all the configurations
-      nixosConfigurations = nixosConfigurations;
-      darwinConfigurations = darwinConfigurations;
-      homeConfigurations = homeConfigurations;
+      nixosConfigurations = nixosConfigurations; # All defined NixOS systems
+      darwinConfigurations = darwinConfigurations; # All defined macOS systems
+      homeConfigurations = homeConfigurations; # All defined Home Manager user profiles
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
     };

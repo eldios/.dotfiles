@@ -6,37 +6,22 @@
       enable = true;
 
       settings = {
+        # INFO: Alacritty colors are managed by Stylix.
+        # No hardcoded 'colors' block was present here. If one were added, it should be commented out.
 
         general.live_config_reload = true;
 
         window = {
           padding.x = 0;
           padding.y = 10;
-          opacity   = 0.9;
           class.instance = "Alacritty";
-          class.general  = "Alacritty";
+          class.general = "Alacritty";
           decorations = "None";
         };
 
         scrolling = {
           history = 10000;
           multiplier = 3;
-        };
-
-        font = {
-          normal = {
-            family = "Hack Nerd Font Mono";
-            style = "Regular";
-          };
-          bold = {
-            family = "Hack Nerd Font Mono";
-            style = "Bold";
-          };
-          italic = {
-            family = "Hack Nerd Font Mono";
-            style = "Italic";
-          };
-          size = 12.0;
         };
 
         cursor = {
